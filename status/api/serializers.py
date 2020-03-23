@@ -7,10 +7,13 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = [
+            'id',
             'user',
             'content',
             'image',
         ]
+
+        read_only_fields = ['user'] # GET
 
     # validate serializer - to require Content or Image
     def validate(self, data):

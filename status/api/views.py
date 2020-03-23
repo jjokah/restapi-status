@@ -1,4 +1,5 @@
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions
+from rest_framework.authentication import SessionAuthentication
 
 from status.models import Status
 from .serializers import StatusSerializer
@@ -29,8 +30,8 @@ class StatusAPIDetailView(
 class StatusAPIView(
     mixins.CreateModelMixin,
     generics.ListAPIView):
-    permission_classes      = []
-    authentication_classes  = []
+    permission_classes      = [permissions.IsAuthenticatedOrReadOnly]
+    authentication_classes  = [SessionAuthentication]
     serializer_class        = StatusSerializer
     passed_id               = None
 
@@ -44,3 +45,6 @@ class StatusAPIView(
 
     def post(self,request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
