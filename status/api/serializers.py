@@ -12,6 +12,7 @@ class StatusSerializer(serializers.ModelSerializer):
             'image',
         ]
 
+    # validate serializer - to require Content or Image
     def validate(self, data):
         content = data.get("content", None)
         if content == "":

@@ -12,12 +12,14 @@ class StatusForm(forms.ModelForm):
             'image',
         ]
 
+    # clean content up before posting form
     def clean_content(self, *args, **kwargs):
         content = self.cleaned_data.get('content')
         if len(content) > 240:
             raise forms.ValidationError("Content is too long")
         return content
     
+    # clean whole form up before posting form
     def clean(self, *args, **kwargs):
         data = self.cleaned_data
         content = data.get('content', None)

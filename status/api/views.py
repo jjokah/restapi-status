@@ -4,6 +4,7 @@ from status.models import Status
 from .serializers import StatusSerializer
 
 
+# Detail View class
 class StatusAPIDetailView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
@@ -24,6 +25,7 @@ class StatusAPIDetailView(
         return self.destroy(request, *args, **kwargs)
 
 
+# List view class
 class StatusAPIView(
     mixins.CreateModelMixin,
     generics.ListAPIView):

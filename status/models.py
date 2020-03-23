@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 
+# to upload a file via ImageField
 def upload_status_image(instance, filename):
     return "status/{user}/{filename}".format(user=instance.user, filename=filename)
 
