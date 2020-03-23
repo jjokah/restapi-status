@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # local
+    'accounts',
     'status',
 ]
 
@@ -128,4 +129,5 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static-server', 'media-root')
 MEDIA_URL = '/media/'
 
+# other settings would be found at restapi/restconf/main.py
 from restapi.restconf.main import *
