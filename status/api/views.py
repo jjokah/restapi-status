@@ -26,8 +26,6 @@ class StatusAPIDetailView(
 
 class StatusAPIView(
     mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
     generics.ListAPIView):
     permission_classes      = []
     authentication_classes  = []
