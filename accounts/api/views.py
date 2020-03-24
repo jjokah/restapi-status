@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Q
 
-from rest_framework import permissions
+from rest_framework import permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
+
+from .serializers import UserRegisterSerializer
 
 
 jwt_payload_handler             = api_settings.JWT_PAYLOAD_HANDLER
@@ -39,3 +41,9 @@ class AuthView(APIView):
             response = jwt_response_payload_handler(token, user, request=request)
             return Response(response)
         return Response({"detail": "Invalid credentials"}, status=401)
+
+
+class RegisterAPIView(generics.CreateAPIView):
+    queryset                = User.objects.all()
+    serializer_class        = UserRegisterSerializer
+    permissions_classes     = [permissions.AllowAny]
