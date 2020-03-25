@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 
+from .permissions import AnonPermissionOnly
 from .serializers import UserRegisterSerializer
 
 
@@ -19,7 +20,7 @@ User = get_user_model()
 
 # Customized Authentication View
 class AuthView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AnonPermissionOnly]
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
             return Response({'detail': 'You are already authenticated'}, status=400)
@@ -46,4 +47,7 @@ class AuthView(APIView):
 class RegisterAPIView(generics.CreateAPIView):
     queryset                = User.objects.all()
     serializer_class        = UserRegisterSerializer
-    permissions_classes     = [permissions.AllowAny]
+    permission_classes     = [AnonPermissionOnly]
+
+    def get_serializer_context(self, *args, **kwargs):
+        return {"request": self.request}
