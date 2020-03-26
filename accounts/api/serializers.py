@@ -86,3 +86,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user_obj.set_password(validate_data.get('password'))
         user_obj.save()
         return user_obj
+
+
+class UserAuthSerializer(serializers.ModelSerializer):
+    password       = serializers.CharField(
+                            style={'input_type': 'password'}, 
+                            write_only=True) # overide password inbuilt serializer
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'password',
+        ]
+        extra_kwargs = {'password': {'write_only': True}}
