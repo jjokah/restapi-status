@@ -37,11 +37,13 @@ class AuthView(APIView):
             user_obj = qs.first()
             if user_obj.check_password(password):
                 user = user_obj
+            else:
+                return Response({"detail": "Invalid password"}, status=401)
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
             response = jwt_response_payload_handler(token, user, request=request)
             return Response(response)
-        return Response({"detail": "Invalid credentials"}, status=401)
+        return Response({"detail": "User does not exist"}, status=401)
 
 
 class RegisterAPIView(generics.CreateAPIView):
