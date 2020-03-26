@@ -1,6 +1,7 @@
 from rest_framework import generics, mixins, permissions
 from rest_framework.authentication import SessionAuthentication
 
+from accounts.api.permissions import IsOwnerOrReadOnly
 from status.models import Status
 from .serializers import StatusSerializer
 
@@ -10,7 +11,7 @@ class StatusAPIDetailView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     generics.RetrieveAPIView):
-    permission_classes      = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes      = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     # authentication_classes  = []
     serializer_class        = StatusSerializer
     queryset                = Status.objects.all()
@@ -31,7 +32,7 @@ class StatusAPIView(
     mixins.CreateModelMixin,
     generics.ListAPIView):
     permission_classes      = [permissions.IsAuthenticatedOrReadOnly]
-    # authentication_classes  = [SessionAuthentication]
+    authentication_classes  = [SessionAuthentication]
     serializer_class        = StatusSerializer
     passed_id               = None
 
