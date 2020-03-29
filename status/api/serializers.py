@@ -1,28 +1,15 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse as api_reverse
 
 from accounts.api.serializers import UserPublicSerializer
 from status.models import Status
 
 
-# status serializer for a users
-class StatusInlineUserSerializer(serializers.ModelSerializer):
-    uri         = serializers.SerializerMethodField(read_only=True)
-    class Meta:
-        model = Status
-        fields = [
-            'uri',
-            'id',
-            'content',
-            'image',
-        ]
-
-    def get_uri(self, obj):
-        return "/api/status/{id}/".format(id=obj.id)
-
-
+# main serializer for status
 class StatusSerializer(serializers.ModelSerializer):
-    uri         = serializers.SerializerMethodField(read_only=True)
-    user        = UserPublicSerializer(read_only=True) # nested serializer
+    uri = serializers.SerializerMethodField(read_only=True)
+    user = UserPublicSerializer(read_only=True)  # nested serializer
+
     class Meta:
         model = Status
         fields = [
@@ -33,10 +20,13 @@ class StatusSerializer(serializers.ModelSerializer):
             'image',
         ]
 
-        read_only_fields = ['user'] # GET
+        read_only_fields = ['user']  # GET
 
     def get_uri(self, obj):
-        return "/api/status/{id}/".format(id=obj.id)
+        request = self.context.get('request')
+        return api_reverse('api-status:detail',
+                           kwargs={"id": obj.id},
+                           request=request)
 
     # validate serializer - to require Content or Image
     def validate(self, data):
@@ -47,3 +37,15 @@ class StatusSerializer(serializers.ModelSerializer):
         if content is None and image is None:
             raise serializers.ValidationError("Content or image is required.")
         return data
+
+
+# status serializer for a user
+class StatusInlineUserSerializer(StatusSerializer):
+    class Meta:
+        model = Status
+        fields = [
+            'uri',
+            'id',
+            'content',
+            'image',
+        ]

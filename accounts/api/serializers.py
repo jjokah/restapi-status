@@ -3,13 +3,14 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from rest_framework import serializers
+from rest_framework.reverse import reverse as api_reverse
 from rest_framework_jwt.settings import api_settings
 
 
-jwt_payload_handler             = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler              = api_settings.JWT_ENCODE_HANDLER
-jwt_response_payload_handler    = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
-expire_delta                    = api_settings.JWT_REFRESH_EXPIRATION_DELTA
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+expire_delta = api_settings.JWT_REFRESH_EXPIRATION_DELTA
 
 
 User = get_user_model()
@@ -17,7 +18,8 @@ User = get_user_model()
 
 # Serializer to show user detail
 class UserPublicSerializer(serializers.ModelSerializer):
-    uri         = serializers.SerializerMethodField(read_only=True)
+    uri = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
         fields = [
@@ -27,17 +29,22 @@ class UserPublicSerializer(serializers.ModelSerializer):
         ]
 
     def get_uri(self, obj):
-        return "/api/user/{id}/".format(id=obj.id)
+        request = self.context.get('request')
+        return api_reverse('api-user:detail',
+                           kwargs={"username": obj.username},
+                           request=request)
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    password       = serializers.CharField(
-                            style={'input_type': 'password'}, 
-                            write_only=True) # overide password inbuilt serializer
-    password2       = serializers.CharField(style={'input_type': 'password'}, write_only=True)
-    token           = serializers.SerializerMethodField(read_only=True)
-    expires           = serializers.SerializerMethodField(read_only=True)
-    token_response           = serializers.SerializerMethodField(read_only=True)
+    password = serializers.CharField(
+        style={'input_type': 'password'},
+        write_only=True)  # overide password inbuilt serializer
+    password2 = serializers.CharField(
+        style={'input_type': 'password'},
+        write_only=True)
+    token = serializers.SerializerMethodField(read_only=True)
+    expires = serializers.SerializerMethodField(read_only=True)
+    token_response = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
@@ -68,14 +75,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         qs = User.objects.filter(email__iexact=value)
         if qs.exists():
-            raise serializers.ValidationError("User with this email already exists")
+            raise serializers.ValidationError(
+                "User with this email already exists")
         return value
 
     # make sure username does not exist in db
     def validate_username(self, value):
         qs = User.objects.filter(username__iexact=value)
         if qs.exists():
-            raise serializers.ValidationError("User with this username already exists")
+            raise serializers.ValidationError(
+                "User with this username already exists")
         return value
 
     # custom serializer method -- of field 'token'
@@ -104,9 +113,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserAuthSerializer(serializers.ModelSerializer):
-    password       = serializers.CharField(
-                            style={'input_type': 'password'}, 
-                            write_only=True) # overide password inbuilt serializer
+    password = serializers.CharField(
+        style={'input_type': 'password'},
+        write_only=True)  # overide password inbuilt serializer
+
     class Meta:
         model = User
         fields = [
