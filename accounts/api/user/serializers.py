@@ -25,7 +25,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         request = self.context.get('request')
-        limit = 2
+        limit = 4
         if request:
             limit_query = request.GET.get('limit')
             try:

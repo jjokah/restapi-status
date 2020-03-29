@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics
+from rest_framework.response import Response
 
 from status.api.serializers import StatusInlineUserSerializer
+from status.api.views import StatusAPIView
 from status.models import Status
 from .serializers import UserDetailSerializer
 
@@ -19,8 +21,8 @@ class UserDetailAPIView(generics.RetrieveAPIView):
         return {'request': self.request}
 
 
-# view for a user status
-class UserStatusAPIView(generics.ListAPIView):
+# view for a user status, inherit from main StatusAPIView
+class UserStatusAPIView(StatusAPIView):
     serializer_class    = StatusInlineUserSerializer
 
     def get_queryset(self, *args, **kwargs):
@@ -28,3 +30,7 @@ class UserStatusAPIView(generics.ListAPIView):
         if username is None:
             return Status.objects.none()
         return Status.objects.filter(user__username=username)
+
+    # prevent posting here, since posting was also inherited
+    def post(self, request, *args, **kwargs):
+        return Response({"detail": "Not allowed here"}, status=400)

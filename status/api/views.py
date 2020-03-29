@@ -6,7 +6,7 @@ from status.models import Status
 from .serializers import StatusSerializer
 
 
-# Detail View class
+# Detail View class for each status
 class StatusAPIDetailView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
@@ -27,7 +27,7 @@ class StatusAPIDetailView(
         return self.destroy(request, *args, **kwargs)
 
 
-# List view class
+# List view class for all status
 class StatusAPIView(
     mixins.CreateModelMixin,
     generics.ListAPIView):
@@ -35,14 +35,10 @@ class StatusAPIView(
     authentication_classes  = [SessionAuthentication]
     serializer_class        = StatusSerializer
     passed_id               = None
+    search_fields           = ('user__username', 'content', 'user__email')
+    ordering_fields         = ('user__username', 'timestamp')
+    queryset                = Status.objects.all()
 
-    def get_queryset(self):
-        request = self.request
-        qs = Status.objects.all()
-        query = request.GET.get('q')
-        if query is not None:
-            qs = qs.filter(content__icontains=query)
-        return qs
 
     def post(self,request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
