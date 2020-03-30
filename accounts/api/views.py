@@ -10,9 +10,9 @@ from .permissions import AnonPermissionOnly
 from .serializers import UserRegisterSerializer, UserAuthSerializer
 
 
-jwt_payload_handler             = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler              = api_settings.JWT_ENCODE_HANDLER
-jwt_response_payload_handler    = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
 
 User = get_user_model()
@@ -22,18 +22,21 @@ User = get_user_model()
 class AuthView(APIView):
     permission_classes = [AnonPermissionOnly]
     serializer_class = UserAuthSerializer
+
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return Response({'detail': 'You are already authenticated'}, status=400)
+            return Response({'detail': 'You are already authenticated'},
+                            status=400)
         data = request.data
-        username = data.get('username') # username or email address
+        username = data.get('username')  # username or email address
         password = data.get('password')
-        user = authenticate(username=username, password=password)
+        # user = authenticate(username=username, password=password)
+
         # allow to accept username or email
         qs = User.objects.filter(
-                Q(username__iexact=username)|
-                Q(email__iexact=username)
-            ).distinct()
+            Q(username__iexact=username) |
+            Q(email__iexact=username)
+        ).distinct()
         if qs.count() == 1:
             user_obj = qs.first()
             if user_obj.check_password(password):
@@ -42,15 +45,16 @@ class AuthView(APIView):
                 return Response({"detail": "Invalid password"}, status=401)
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
-            response = jwt_response_payload_handler(token, user, request=request)
+            response = jwt_response_payload_handler(
+                token, user, request=request)
             return Response(response)
         return Response({"detail": "User does not exist"}, status=401)
 
 
 class RegisterAPIView(generics.CreateAPIView):
-    queryset                = User.objects.all()
-    serializer_class        = UserRegisterSerializer
-    permission_classes     = [AnonPermissionOnly]
+    queryset = User.objects.all()
+    serializer_class = UserRegisterSerializer
+    permission_classes = [AnonPermissionOnly]
 
     def get_serializer_context(self, *args, **kwargs):
         return {"request": self.request}
