@@ -1,5 +1,6 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import Q
+from django.shortcuts import redirect
 
 from rest_framework import permissions, generics
 from rest_framework.views import APIView
@@ -16,6 +17,12 @@ jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
 
 User = get_user_model()
+
+
+# simple logout view
+def logout_view(request):
+    logout(request)
+    return redirect("api-auth:auth")
 
 
 # Customized Authentication View
@@ -41,6 +48,7 @@ class AuthView(APIView):
             user_obj = qs.first()
             if user_obj.check_password(password):
                 user = user_obj
+                login(request, user)  # login in the user
             else:
                 return Response({"detail": "Invalid password"}, status=401)
             payload = jwt_payload_handler(user)
